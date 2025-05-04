@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <title>Chats Toolkit</title>
+  <style>
+    /* General styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .info-bar {
+      background-color: #f4f4f4;
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .sections {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      flex: 3;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .section {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      margin-bottom: 10px;
+    }
+
+    .section button {
+      display: block;
+      margin: 5px 0;
+      padding: 1px 6px;
+      width: auto;
+      min-width: 166.89px;
+      height: 21px;
+      text-align: left;
+      background-color: #FDF0F0;
+      border: 1px solid #000000;
+      color: #000000;
+      font-family: Arial, sans-serif;
+      font-size: 13.3333px;
+      cursor: pointer;
+      line-height: 19px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section button:hover {
+      background-color: #e9e9e9;
+    }
+
+    .add-button {
+      margin-top: 10px;
+      padding: 2px 6px; /* Smaller padding */
+      background-color: #ADD8E6; /* Light blue */
+      color: black; /* Black text */
+      border: none;
+      cursor: pointer;
+      font-size: 12px; /* Smaller font size */
+      width: 50%; /* Halved width */
+      margin-left: auto; /* Center the button */
+      margin-right: auto; /* Center the button */
+      height: 24px; /* Fixed height */
+    }
+
+    .add-button:hover {
+      background-color: #87CEEB; /* Slightly darker blue on hover */
+    }
+
+    .notes-section {
+      flex: 1;
+      padding: 10px;
+      border-left: 1px solid #ccc;
+      background-color: #f9f9f9;
+      overflow-y: auto; /* Enable vertical scrolling */
+      resize: horizontal; /* Allow horizontal resizing */
+      min-width: 200px; /* Minimum width for the notes section */
+      max-width: 50%; /* Maximum width for the notes section */
+    }
+
+    .notes-section textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+
+    .customer-note-format {
+      margin-top: 20px;
+    }
+
+    .customer-note-format textarea {
+      width: 100%;
+      height: 200px; /* Increased height to accommodate multiple chats */
+      margin-bottom: 10px;
+    }
+
+    .copy-note-button {
+      padding: 2px 6px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      width: 100px;
+      height: 24px;
+    }
+
+    .copy-note-button:hover {
+      background-color: #0056b3;
+    }
+
+    .dtk-calculator {
+      margin-top: 20px;
+    }
+
+    .dtk-calculator table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .dtk-calculator th,
+    .dtk-calculator td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .dtk-calculator input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .quote-tool-calculator {
+      margin-top: 20px;
+    }
+
+    .quote-tool-calculator table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .quote-tool-calculator th,
+    .quote-tool-calculator td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .quote-tool-calculator input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .result {
+      font-weight: bold;
+    }
+
+    .modal {
+      display: none;
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      width: 300px;
+    }
+
+    .modal textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+
+    .modal input {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .modal button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+
+    .modal button.delete-button {
+      background-color: #dc3545; /* Red color for delete button */
+    }
+
+    .modal button:hover {
+      background-color: #0056b3;
+    }
+
+    .modal button.delete-button:hover {
+      background-color: #c82333; /* Darker red on hover */
+    }
+
+    /* Styles for Copy, Clear, and Back buttons */
+    .notes-buttons,
+    .customer-note-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .copy-button {
+      padding: 2px 6px;
+      background-color: #007BFF; /* Blue */
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      width: 100px;
+      height: 24px;
+    }
+
+    .copy-button:hover {
+      background-color: #0056b3; /* Darker blue on hover */
+    }
+
+    .clear-button {
+      padding: 2px 6px;
+      background-color: #dc3545; /* Red */
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      width: 100px;
+      height: 24px;
+    }
+
+    .clear-button:hover {
+      background-color: #c82333; /* Darker red on hover */
+    }
+
+    .back-button {
+      padding: 2px 6px;
+      background-color: #28a745; /* Green */
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px; /* Revert to smaller font size */
+      width: 100px; /* Revert to original width */
+      height: 24px;
+    }
+
+    .back-button:hover {
+      background-color: #218838; /* Darker green on hover */
+    }
+  </style>
+</head>
+<body>
+  <!-- Info bar for Manila Time and NI -->
+  <div class="info-bar">
+    <span id="manila-time">Manila Time: 11:07:54 AM</span>
+    <span id="ni">NI: Network Type: 4g, Downlink: 1.1 Mbps</span>
+  </div>
+
+  <div class="container">
+    <div class="sections" id="container">
+      <!-- Sections will be dynamically generated here -->
+    </div>
+
+    <div class="notes-section">
+      <h2>Notes</h2>
+      <textarea id="notes" placeholder="Take notes here..."></textarea>
+      <!-- Add Copy and Clear buttons under Notes -->
+      <div class="notes-buttons">
+        <button class="copy-button" onclick="copyNotes()">Copy</button>
+        <button class="clear-button" onclick="clearNotes()">Clear</button>
+      </div>
+      <div class="customer-note-format">
+        <h2>Customer Note Format</h2>
+        <textarea id="customer-note" placeholder="Enter customer note format here..."></textarea>
+        <!-- Add Copy, Clear, and Back buttons under Customer Note Format -->
+        <div class="customer-note-buttons">
+          <button class="copy-button" onclick="copyCustomerNote()">Copy</button>
+          <button class="clear-button" onclick="clearCustomerNote()">Clear</button>
+          <button class="back-button" onclick="restoreCustomerNote()">Back</button>
+        </div>
+      </div>
+      <div class="dtk-calculator">
+        <h2>DTK Calculator</h2>
+        <table>
+          <tbody>
+            <tr>
+              <th>Item cost (without GST)</th>
+              <th>Discount (except shipping promotion)</th>
+              <th>DTK %</th>
+              <th>Final DTK Amount</th>
+            </tr>
+            <tr>
+              <td><input type="number" id="item-cost" value="200.08"></td>
+              <td><input type="number" id="discount" value="5"></td>
+              <td><input type="number" id="dtk-percent" value="30"></td>
+              <td><input type="number" id="final-dtk" readonly></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="quote-tool-calculator">
+        <h2>Quote Tool Discount % Calculator</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Current Price</th>
+              <th>Sale Price</th>
+              <th>Discount Percentage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" id="currentPrice" placeholder="Enter current price" step="0.01" min="0"></td>
+              <td><input type="number" id="salePrice" placeholder="Enter sale price" step="0.01" min="0"></td>
+              <td class="result" id="discountPercentage">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating modal for editing topic and response -->
+  <div id="edit-modal" class="modal">
+    <input type="text" id="edit-topic" placeholder="Edit topic name">
+    <textarea id="edit-response" placeholder="Edit response body"></textarea>
+    <button id="save-changes">Save Changes</button>
+    <button id="delete-topic" class="delete-button">Delete</button>
+  </div>
+
+  <script>
+    // Data object containing categories, topics, and responses
+    const data = {
+      enquiries: {
+        title: "Enquiries",
+        topics: [
+          {
+            name: "$25 off First Order Promo",
+            response: `Our sincere apologies that you're experiencing some difficulty redeeming the $25 off your first order promo. Please ensure that these criteria are met before using the code: 1. The offer is only available on your first order where the order value is over $199 (not including shipping) 2. The promo code is only available for 7 days after signing up and then expires. If all of the above criteria are met and you are still unable to use the code, kindly give us a call so we can assist you in placing the order.`,
+          },
+          {
+            name: "Animal Products",
+            response: `We acknowledge that the use of animal products (such as leather, hides, horn, and bone) is not for everyone. Our products team is reputable and well-known for its commitment to sourcing products from accredited producers and tanneries. In many cases these producers are ISO accredited, are signatories to codes of conduct, and are the materials used are by-products of the food production industry. Rest assured that all products meet or exceed strict Australian Government import standards.`,
+          },
+          {
+            name: "Checkout Error - Item Cannot Be Shipped / 2-Person Delivery",
+            response: `We are constantly expanding our delivery network through partnerships with various carriers but at this time, we are unable to deliver the <ITEM NAME> to that particular postcode. We may be able to deliver smaller items that do not require 2-person delivery to your desired delivery address, or alternatively, you can try an alternative address/postcode for that product.`,
+          },
+          {
+            name: "Delete Account",
+            response: `While we are unable to delete accounts particularly where they contain an order history, I have arranged for your account to be deactivated from our system. This can take up to 24 hours to take effect so please excuse any emails that you may receive in the meantime. Please be assured that your information is protected under the privacy policy that you can view here: https://www.templeandwebster.com.au/customerservice/general_info.php#privacy We're sorry to see you go however you're always welcome back. You may create an account again via this link www.templeandwebster.com.au/customer/account/create/`,
+          },
+          {
+            name: "Google Ads - Honour Price",
+            response: `I can confirm that the pricing on our website is correct. Google is one of our advertising partners and we have already reached out to them to request for the pricing to be updated on the Ads. Thank you again for bringing this to our attention and as a gesture of goodwill, we can give a discount for this item. You may purchase it for <XXX> only. Please let me know if you will be interested in taking advantage of this offer so I can assist you in placing the order.`,
+          },
+          {
+            name: "Honour Price Change / Match",
+            response: `We have checked the price for the XXXX and in this instance, we are able to honour the price match of XXXXX excluding shipping fees. Please note that no additional promotional codes can be used in conjunction with this discounted price.`,
+          },
+          {
+            name: "How to Use a Voucher / Promo Code",
+            response: `It's a shame to hear you're experiencing some difficulty applying your code. I've endeavoured to provide step-by-step instructions below. After providing the shipping address upon checkout, you will be directed to the payment page. 1. Below the credit card section, you will see "Use a gift card/promotion". 2. Click the box "Apply a gift card or promo code" - this box should then expand. Enter your code and click "Apply" 3. Refer to the right side of the page where you should see the discount applied and the total balance owing. 4. Enter your credit card details and click "Continue" following the prompts until the order is finalised.`,
+          },
+          {
+            name: "How ZipPay Works",
+            response: `ZipPay works like an account. You receive a statement of all your purchases in a given month on the 1st day of the following month which you can pay until the end of the following month to avoid any fees. Should the balance be carried over to the next month, a small $5 account fee will be applied. A minimum monthly payment of $40 should you need a longer time to pay off your balance and a service fee of $5 will be added to your balance on the first day of the following month. If you pay off your balance in full, you will not be charged the $5 service fee. There is a $1000 approval limit, with no minimum purchase requirement. If your order exceeds your account's current limit, you can settle the balance via another payment method, such as Paypal or Credit Card. If for any reason a refund is required, any zipPay portion will be refunded to your zipPay account. If there are any additional remaining funds, this will simply be refunded to your credit card associated with your zipPay account. I hope this information helps and please feel free to seek further information available on the zipPay website found here: https://zip.co/`,
+          },
+          {
+            name: "International Shipping",
+            response: `Our logistics are set up for us to only ship within Australia. A suggestion we can make (if you have friends or family residing in Australia) is to have goods delivered to them which they can then forward to you.`,
+          },
+          {
+            name: "Orders In Review (OIR) / Fraud Check",
+            response: `Thank you for reaching out regarding your purchase. For security reasons, your order has been temporarily placed on hold for assessment before being processed. We apologise for any inconvenience this may cause. I will be passing you over to our Sydney security specialists who will be able to help resolve this for you.`,
+          },
+          {
+            name: "Encourage App",
+            response: `If you haven't already, place your first order via Temple & Webster's Android or iOS App, with a minimum spend of $199 and enjoy $20 off your first purchase. 20APP to get $20 off your first in-app purchase`,
+          },
+          {
+            name: "Encourage Newsletter",
+            response: `If you haven't already, sign up for our newsletter and never miss out on promotions and sale events. With a minimum spend of $199, you can also enjoy a $20 discount on your first purchase. Save $20 off your first order: https://www.templeandwebster.com.au/Discount-Promo-Codes-C1954764.html Refer a friend to get $25 off your next order: https://www.templeandwebster.com.au/Refer-a-Friend-C1956933.html`,
+          },
+          {
+            name: "Create a Quote",
+            response: `I have created a case to request for a quote to be sent to you via email. You may expect to receive this email within the next 2 business days. Here's the case number XXXXX should you need to follow up on this request.`,
+          },
+          {
+            name: "Check Shipping Fee",
+            response: `You can see your delivery cost from your shopping cart. You'll be asked to enter your postcode there and the page will refresh with your shipping costs. It all happens before you commit to buying.`,
+          },
+          {
+            name: "Warranty Guidelines",
+            response: `Please note that any modifications made to the item, which are not part of the original product's features and description, may affect the warranty. We advise preserving the original configuration to uphold the warranty terms.`,
+          },
+          {
+            name: "Suggest alternative items - Notify Me Button",
+            response: `Apologies, but it seems that the product you're interested in is currently out of stock or unavailable at the moment. However, I'd be more than happy to recommend some alternative items that might pique your interest: <insert link for item 1> <insert link for item 2> You may also want to utilise our "Notify Me" button that you can find on our website, right under the product price for out of stock products. This will trigger an email that will be sent to you when the item is back in stock.`,
+          },
+          {
+            name: "Color Query",
+            response: `Our website is designed to give the best possible visual representation of the items featured in our catalogue and includes comprehensive product information. While we endeavour to best capture the true-to-life product colours in photographs, it is worth bearing in mind that colours can vary between monitors, devices and lighting conditions. Sometimes it can help to view the images on multiple monitors or displays and under different lighting conditions. We understand that an online store is not the same as seeing the product in person, so if you make a purchase and it's not quite right, we offer a generous returns policy (http://www.templeandwebster.com.au/help/faq.php ). If an item is not to your liking, you are welcome to return it for a store credit (less the initial shipping fee and the cost of the return shipping) within 30 days of taking delivery.`,
+          },
+          {
+            name: "Missing Order",
+            response: `In order for our team to efficiently assist with locating your order details, kindly provide the following information: Date the order was placed: Payment method used: Last four digits of your card: Exact order amount: How the order was placed - website/app/mobile: Full name used in the order: Email address used to place the order: Shipping Address: SKU # or URL link of the item(s) purchased and the quantity of each SKU you ordered: Size and colour of the item purchased (if applicable): Screenshot of the transaction:`,
+          },
+        ],
+      },
+
+      deliveries: {
+        title: "Deliveries",
+        topics: [
+          {
+            name: "Tracking Update - Within Timeframe",
+            response: `Thank you for waiting. I can see that everything on your order is under control. Please expect that the item will be delivered by XXX or earlier and please let us know just in case the item didn't arrive beyond XXX.`,
+          },
+          {
+            name: "Delayed Delivery - General Query",
+            response: `I'm so sorry you're having trouble with your delivery. I'll ask our delivery partner to investigate what's happened and find your item. We'll hear back from them within 3-5 business days. We'll continue to follow up with them and a case manager will update you as soon as we hear back.`,
+          },
+          {
+            name: "Delayed Delivery - Beyond Timeframe but Scan is Updated",
+            response: `Thank you for your patience. Upon reviewing the tracking information, it appears that the item has been scanned as received in the courier's depot and is currently in transit, with the latest update showing a scan from yesterday. However, the delivery of the item is already outside the estimated delivery date range. We kindly ask for your patience as the item may arrive in the next 1-2 business days. If it still hasn't arrived by then, please don't hesitate to contact us again, and we'll be happy to assist you in resolving the matter.`,
+          },
+          {
+            name: "Delayed Delivery - Beyond Timeframe and Scan is NOT Updated",
+            response: `If you're willing to wait a bit longer, I'd like to lodge a query with our delivery partner to get an update on the delivery status of the item. This will ensure we have the most accurate information for you. However, kindly allow a window of 3 to 5 business days to give you an update on the investigation. Please let me know if you'd like me to proceed with this.`,
+          },
+          {
+            name: "Delayed Delivery - Beyond Dispatch Timeframe but still within Delivery Timeframe",
+            response: `Thank you for your patience. Once again, I sincerely apologise for the delivery issue on the item. As per checking the item is already a few days beyond the dispatch date of the item and there is no meaningful update on the tracking scan xxxxx since XXXX, I would like to offer a resolution of replacing your item. The replacement item is expected to leave our warehouse within the next 2 business days. Once dispatched, you will receive a dispatch email containing a tracking number and the estimated delivery date for your convenience. Please let us know your preferred resolution.`,
+          },
+          {
+            name: "Shipping - No PO BOX",
+            response: `Please be advised our system is unable to accept PO box addresses, only street addresses. The products that we ship often exceed the dimensions permitted by PO boxes and may be too large to handle. Thus many of our items are sent via different delivery partners that do not deliver to PO boxes. Alternatively, you may nominate your work address or a friend's address for your delivery.`,
+          },
+          {
+            name: "No Pick-up",
+            response: `All our items are shipped directly from the warehouse to your home, so we can't offer any pick ups.`,
+          },
+          {
+            name: "Shipping - Too expensive",
+            response: `The shipping and handling costs you've been quoted are dependent on the total combined weight of your order, the volume of the items and also the destination they will be shipped from and to. If you are ordering multiple items it is likely that they are dispatched from different warehouse locations and therefore priced accordingly per item. If you still feel like the shipping is excessive then please let us know what you are purchasing along with your shipping address and we can look further into it for you.`,
+          },
+          {
+            name: "Replacement",
+            response: `Sure thing! Let me process the replacement here and I'll get back to you as soon as I'm done. Please stay connected.`,
+          },
+          {
+            name: "Missing Parts",
+            response: `May I ask you send us a photo of the item received and the copy of the assembly manual encircle the parts missing.`,
+          },
+          {
+            name: "Separate Delivery",
+            response: `OK I've checked where your parcel are. Don't worry [Box X] and Box X] are still in transit. It's normal for multiple boxes to be delivered separately as they might be coming from different warehouses. We will send you a notification as soon as these items are onboard for delivery.`,
+          },
+          {
+            name: "Courier Feedback",
+            response: `Thanks for that feedback, it's really valuable and helps us improve. I'll forward it to our operations team as they're always looking for ways to improve our shipping process.`,
+          },
+          {
+            name: "Order Cancellation or Return Self-help",
+            response: `For your convenience, you can request for order cancellation or returns by logging to your My Account in our website and selecting "View My Orders". Once selected it will route you to a new page where you can find all your orders. Just select the correct order and then you will find all items under that order and the "Cancel Item" or "Return Item" button right beside each item in that particular order.`,
+          },
+          {
+            name: "Setting Cancellations Expectation - Self Help",
+            response: `Thank you for your patience. As per checking, the item will be dispatched on XXXX. I understand that your circumstances may have changed and you wish to cancel your order and I would like to set the expectation that once an order is in the processing stage and preparing for dispatch, cancellation becomes challenging. I can initiate a cancellation for this item. However, the item will be on "Pending Cancellation" as we will need to wait for the warehouse team to confirm your cancellation request. You can expect an email update within the next 2 business days regarding the status of your cancellation request. Would you like to proceed with the cancellation? If the cancellation request is accepted, a refund will be issued back to your original payment and depending on your financial institution, this will take up to 2-5 business days for the refund amount to reflect on your bank statement depending on the payment method and financial institution. In the event that the cancellation request is denied, you still have the option to return the item once received. Once you receive the item, you can submit a "Change of Mind" return request via My Account on our website. Just login to your Temple and Webster account on our website using the email address linked to your order. Or you may contact us anytime once the item is received so we can initiate a return process for the item.`,
+          },
+          {
+            name: "Post-Sale Estimated Delivery Timeframe",
+            response: `Delivery times depend on the distance from the warehouse to your home. Your purchase is generally dispatched on the day shown on the item page. Once you receive the tracking details, it normally takes 2-7 business days for delivery. But, it can take up to 10 business days for interstate deliveries. I would recommend to keep an eye out of the dispatch email. This contains a more accurate delivery date range and has the tracking details so you can track the order online. Once received, please wait for 2 business days for the scans to be updated. Or you may login to your My Account and click "View My Orders" and locate the correct order. You will have an option to track the delivery of all items under that order by clicking the "Track Delivery" button right beside each item details located right above each item picture.`,
+          },
+          {
+            name: "Shipping Estimate VS Dispatch Estimate",
+            response: `We have 2 kinds of shipping estimates which are the Dispatch Estimate and the Delivery Estimate. Since our items are directly coming from our Products Team's warehouse, they have a dispatch time frame depending on the item you are wanting to purchase which you can see in our website on the item page. For your shopping convenience, when an item is dispatched you will receive a dispatch email with a tracking link to click and follow. Usually, our delivery time frame is within 2-10 business days and it will take up to 10 business days if you are living outside Metro area. I would recommend to keep an eye out of the dispatch email. This contains a more accurate delivery date range and has the tracking details so you can track the order online. Once received, please wait for 2 business days for the scans to be updated. Or you may login to your My Account and click "View My Orders" and locate the correct order. You will have an option to track the delivery of all items under that order by clicking the "Track Delivery" button right beside each item details located right above each item picture.`,
+          },
+          {
+            name: "No Specific Delivery Timeframe",
+            response: `Unfortunately, we are unable to set a specific date for delivery. Once the item is dispatched, we will send you an email with a more accurate delivery date range.`,
+          },
+        ],
+      },
+      damages: {
+        title: "Damages",
+        topics: [
+          {
+            name: "Request Photo",
+            response: `Can you send us some photos of the product, showing the fault and one of the packaging if you can. That way we can quickly confirm the fault. Even if you can't see the fault in a photo, it really helps speed our processes.`,
+          },
+          {
+            name: "Encircle Assembly Manual",
+            response: `May I ask you send us a photo of the item received and the copy of the assembly manual encircle the parts missing.`,
+          },
+          {
+            name: "Incorrect Item",
+            response: `Can I ask you to take a photo of the item and the label on the package and attach it here?`,
+          },
+          {
+            name: "Non-Returnable Items",
+            response: `Unfortunately, there are some products that we can't offer 'change of mind' returns on - and this is one of them. You can find the full terms and conditions regarding this on our website: https://www.templeandwebster.com.au/customerservice/general_info/online-shopping-terms.php`,
+          },
+          {
+            name: "Return Label Sent",
+            response: `I have sent you your return label along with the detailed instructions in a separate email which you should have received already. If you do not receive this email, please first check your junk or spam folder. Anything else I can further assist? :)`,
+          },
+          {
+            name: "Offer Resolution",
+            response: `Thank you for patiently waiting. I've reviewed your case and understand that there is an issue with the product you received. Please know that this is not a common occurrence, and I'm committed to resolving this for you. I see that we still have stock available, and I'd like to offer you a replacement. Would this solution work for you? Your satisfaction is our priority, and we want to ensure you're completely happy with your purchase.`,
+          },
+          {
+            name: "Item Disposal",
+            response: `For the damaged item, there is no need for you to return it back to us. You may keep, donate, or dispose of the item as how you see fit.`,
+          },
+          {
+            name: "Replacement Processed",
+            response: `Thank you for your patience. I've successfully processed the replacement for you. You'll receive a replacement confirmation via email shortly for your records. Additionally, in the event that the original item is still delivered to you, please inform us so we can arrange for its collection.`,
+          },
+          {
+            name: "Discount To Keep Offer (DTK)",
+            response: `Please accept our sincere apologies for any inconvenience, it is certainly disappointing when one of our beautiful products is not at its best when it reaches you. I do not wish to inconvenience you any further, so I wanted to know if you would be happy to accept a partial refund of $XXXX or XX% OFF of the item price to keep the item as it is. Should you wish to accept our offer, we will go ahead and process it back on your XXXX.`,
+          },
+          {
+            name: "Refund - Original Payment Method",
+            response: `Thank you for your patience. I've successfully processed the refund back to your original payment method. This might take 2-5 business days depending your financial institution. You'll receive a refund confirmation via email shortly for your records. In the event that the original item is still delivered to you, please inform us so we can arrange for its collection.`,
+          },
+          {
+            name: "Original Packaging",
+            response: `It helps speeds the process if you can put it back in the original box - our product team will also want to see the packaging so we can prevent this from happening again.`,
+          },
+          {
+            name: "Collection Request",
+            response: `For us to get this item back, kindly confirm the below information so I can send you the return labels that need to be affixed to the parcel; 1. Please ensure the goods are packaged as new in the original packaging. 2. Confirm the total number of boxes for collection. 3. Nominate some suitable collection dates from XXXX onward. 4. Confirm the address we have on file is correct; INSERT CX ADDRESS HERE Alternatively, we can arrange a collection from a different address if that is helpful. Please include the company name, suite number, and floor level if it is a business address. 5. Do you have access to a printer to print the consignment label? (For example at home, at work, at Officeworks or your local library etc.) Yes/ No? If you do not have access to a printer, we can mail this out to you prior to booking the collection but will delay the process by at least 2 weeks. 6. Do you have any specific collection instructions for our delivery partner? As couriers don't have specific collection times, you may leave the parcel in a secure area at the front of the property should you not be available. Please ensure the goods are packaged as new in the original packaging with all previous shipping labels removed.`,
+          },
+          {
+            name: "Refund and Dispose - Refund Item Disposal",
+            response: `Thanks for waiting. I've processed your refund of $xxxx. It'll be returned to your original payment method in 2-5 business days depending on your financial institution. You don't need to send the item back to us.`,
+          },
+          {
+            name: "Replace and Dispose - Replacement Item Disposal",
+            response: `Thanks for waiting, <insert name>. I've processed a replacement for the <insert product name>. The estimated dispatch date would be <refer to date in "Leaves Warehouse" on PDP>. There's no need to send this item back to us.`,
+          },
+          {
+            name: "CXOne Damages Temporary Workaround",
+            response: `The fastest way for your concern to be resolved by our dedicated Damages Team is to submit a Report-A-Problem request on our website, have you been able to do this?`,
+          },
+        ],
+      },
+      returns: {
+        title: "Returns",
+        topics: [
+          {
+            name: "Non-Returnable Items",
+            response: `Unfortunately, there are some products that we can't offer 'change of mind' returns on - and this is one of them. You can find the full terms and conditions regarding this on our website: https://www.templeandwebster.com.au/customerservice/general_info/online-shopping-terms.php`,
+          },
+          {
+            name: "Return Label Sent",
+            response: `I have sent you your return label along with the detailed instructions in a separate email which you should have received already. If you do not receive this email, please first check your junk or spam folder. Anything else I can further assist? :)`,
+          },
+          {
+            name: "Offer Resolution",
+            response: `Thank you for patiently waiting. I've reviewed your case and understand that there is an issue with the product you received. Please know that this is not a common occurrence, and I'm committed to resolving this for you. I see that we still have stock available, and I'd like to offer you a replacement. Would this solution work for you? Your satisfaction is our priority, and we want to ensure you're completely happy with your purchase.`,
+          },
+          {
+            name: "Refund and Dispose - Refund Item Disposal",
+            response: `Thanks for waiting. I've processed your refund of $xxxx. It'll be returned to your original payment method in 2-5 business days depending on your financial institution. You don't need to send the item back to us.`,
+          },
+          {
+            name: "Item Disposal",
+            response: `For the damaged item, there is no need for you to return it back to us. You may keep, donate, or dispose of the item as how you see fit.`,
+          },
+          {
+            name: "Collection Request",
+            response: `For us to get this item back, kindly confirm the below information so I can send you the return labels that need to be affixed to the parcel; 1. Please ensure the goods are packaged as new in the original packaging. 2. Confirm the total number of boxes for collection. 3. Nominate some suitable collection dates from XXXX onward. 4. Confirm the address we have on file is correct; INSERT CX ADDRESS HERE Alternatively, we can arrange a collection from a different address if that is helpful. Please include the company name, suite number, and floor level if it is a business address. 5. Do you have access to a printer to print the consignment label? (For example at home, at work, at Officeworks or your local library etc.) Yes/ No? If you do not have access to a printer, we can mail this out to you prior to booking the collection but will delay the process by at least 2 weeks. 6. Do you have any specific collection instructions for our delivery partner? As couriers don't have specific collection times, you may leave the parcel in a secure area at the front of the property should you not be available. Please ensure the goods are packaged as new in the original packaging with all previous shipping labels removed.`,
+          },
+          {
+            name: "Return - Not As Described (COM - Change of Mind)",
+            response: `I'm sorry to hear the XXXX was not suitable for your intended purpose. Should you feel the item differs from what was advertised, please send us photos of what you have received including any labelling on the item. Please note that if the item received is as advertised, this will be considered a change of mind return and you're welcome to return it as per our return policy below. Returns must be made within 30 days of receiving the item, our terms and conditions can also be found here: https://www.templeandwebster.com.au/customerservice/general_info/online-shopping-terms.php`,
+          },
+        ],
+      },
+      others: {
+        title: "Others",
+        topics: [
+          {
+            name: "Sage Misinformation",
+            response: `We sincerely apologize for any confusion caused by the incorrect response provided by Sage regarding your query about XXXX. We fully understand the importance of accurate information and would like to rectify the situation by providing you with the correct details.`,
+          },
+          {
+            name: "Physical Store / Showroom",
+            response: `Temple & Webster operates exclusively online and does not have any physical showrooms as of the moment. We offer a comprehensive online shopping experience with detailed product pages, including a wide range of images and information to help you make informed purchases. Additionally, customer reviews are available to help you gauge the style and quality of our products.`,
+          },
+          {
+            name: "Tax Invoice",
+            response: `Tax invoices for orders are issued once your order has been shipped to you in full.
+
+To retrieve a tax invoice, sign in to your account (https://www.templeandwebster.com.au/session/secure/account/login.php) and click the 'VIEW MY ORDERS' button. Then simply click the 'Invoice' link beside your order. Or follow this link to go straight to your orders (sign-in required): https://www.templeandwebster.com.au/session/secure/account/order_search.php
+
+Due to legal and taxation reasons, we are unable to make any changes to the billing details on the tax invoice after an order has been placed.`,
+          },
+          {
+            name: "Fundraising",
+            response: `We would love to support everyone and the many worthy causes brought to our attention, however, we're 100% committed to our principal charity partner, Women's Community Shelters (WCS).
+
+We apologise for any disappointment and wish you all the very best with your fundraising.`,
+          },
+          {
+            name: "Google Ads - Honour Price",
+            response: `I can confirm that the pricing on our website is correct. Google is one of our advertising partners and we have already reached out to them to request for the pricing to be updated on the Ads.
+
+Thank you again for bringing this to our attention and as a gesture of goodwill, we can give a discount for this item. You may purchase it for <XXX> only. Please let me know if you will be interested in taking advantage of this offer so I can assist you in placing the order.`,
+          },
+          {
+            name: "How ZipPay Works",
+            response: `ZipPay works like an account. You receive a statement of all your purchases in a given month on the 1st day of the following month which you can pay until the end of the following month to avoid any fees.
+
+Should the balance be carried over to the next month, a small $5 account fee will be applied. A minimum monthly payment of $40 should you need a longer time to pay off your balance and a service fee of $5 will be added to your balance on the first day of the following month.
+
+If you pay off your balance in full, you will not be charged the $5 service fee.
+
+There is a $1000 approval limit, with no minimum purchase requirement. If your order exceeds your account's current limit, you can settle the balance via another payment method, such as Paypal or Credit Card.
+
+If for any reason a refund is required, any zipPay portion will be refunded to your zipPay account. If there are any additional remaining funds, this will simply be refunded to your credit card associated with your zipPay account.
+
+I hope this information helps and please feel free to seek further information available on the zipPay website found here: https://zip.co/`,
+          },
+          {
+            name: "Humm Deactivation",
+            response: `Due to unforeseen circumstances, we have made the decision to temporarily deactivate Humm as a payment option. As a result, Humm has been promptly removed from our website. We understand that this may be an inconvenience for you, and we apologize for any inconvenience caused.
+
+Unfortunately, we do not have an estimated timeframe for when Humm will be reintegrated as a payment option. However, please be assured that we are actively working to address the situation and explore alternative solutions. Our team is committed to ensuring a seamless and diverse range of payment options for our valued customers, and we appreciate your understanding and patience during this time.`,
+          },
+          {
+            name: "Request to be a supplier",
+            response: `We appreciate your interest in becoming a Temple & Webster supplier.
+
+To begin the application process, kindly utilize our dedicated link at www.templeandwebster.com.au/newsupplier.
+
+Given the substantial volume of supplier requests, please be aware that only those who meet the minimum requirements for listing products on our website will be contacted by one of our representatives. For detailed guidance, please refer to our Supplier Guide, which can be found here: https://img.zcdn.com.au/st4/stores/common/extranet/pdf/standard_operating_procedures_v1.0.pdf`,
+          },
+          {
+            name: "Website issue",
+            response: `I'm sorry to hear you are experiencing difficulties finalising your order / logging into our website. May I please ask you to clear your cache and cookies and then try logging into our website again and try placing the order?
+
+If the problem still persists, kindly send us a screenshot of the error you are seeing and we will forward this to our Tech Team to investigate for you. Also please let us know what type of device you are using i.e. Laptop, iPad etc. and also the browser you are using to view our site.`,
+          },
+          {
+            name: "Abusive Customer Warning",
+            response: `Hi XXX, I understand your frustration and I am here to assist you in resolving this concern. May I kindly request that you refrain from using any offensive language.`,
+          },
+          {
+            name: "Black Friday Price Change Issue",
+            response: `Thanks for pointing this out.
+First things first, we'll honour the lowest promotional price for the item you want to buy!
+The item you were interested in was one of a limited number of items included in our Warehouse Sale that ended on Thursday. We tried our best to notify everyone that the Warehouse Sale had ended. Today, we're running a different promotion across our whole site (with some exclusions) that is a much bigger sale including many more products across more categories of our site.`,
+          },
+          {
+            name: "General Feedback",
+            response: `Thanks for sharing this feedback - I understand how you feel. We're always looking for ways to improve and this will help us.`,
+          },
+          {
+            name: "Ghost Spiel",
+            response: `Hi XXX, are you still connected`,
+          },
+          {
+            name: "Product Review",
+            response: `For your convenience, you can provide a review on the items you have ordered by logging to your My Account in our website and selecting "View My Orders". Once selected it will route you to a new page where you can find all your orders. Just select the correct order and then you will find all items under that order and the "Write A Review" button right beside each item on that particular order.`,
+          },
+          {
+            name: "Check Store Credit or Gift Card Certificate Balance",
+            response: `Here's a step-by-step guide to check your gift certificate or store credit balance:
+
+1. Click on the person icon located next to the shopping cart in the top-left corner of the page.
+2. Select 'Account Settings.'
+3. In the Quick Links section on the right-hand pane, click on 'Check Gift Certificate/Store Credit Balance' under 'Gift Certificates & Store Credit.'
+4. You should now see your store credit displayed under 'Store Credit Applied To your Account.'
+
+If you encounter any issues or need further assistance, please don't hesitate to let me know. I'm here to help.`,
+          },
+          {
+            name: "Place Customer on Hold",
+            response: `I understand. Let me take a moment to check on this. I'll be back shortly.`,
+          },
+          {
+            name: "Chat Technical Difficulties",
+            response: `We're currently experiencing some slight technical difficulties that may affect our chat sessions. If the chat drops unexpectedly, please don't hesitate to start a new chat and provide your order number. Our team will promptly review your case history and pick up where the conversation left off.`,
+          },
+          {
+            name: "Verification",
+            response: `I am more than happy to take a look into that, but in order to ensure that we are protecting our customers' personal information, we will need to go through a quick verification process to access your order details.`,
+          },
+        ],
+      },
+      custom: {
+        title: "Custom",
+        topics: [
+          { name: "Custom Topic 1", response: "Response for Custom Topic 1" },
+          { name: "Custom Topic 2", response: "Response for Custom Topic 2" },
+          { name: "Custom Topic 3", response: "Response for Custom Topic 3" },
+          { name: "Custom Topic 4", response: "Response for Custom Topic 4" },
+          { name: "Custom Topic 5", response: "Response for Custom Topic 5" },
+          { name: "Custom Topic 6", response: "Response for Custom Topic 6" },
+          { name: "Custom Topic 7", response: "Response for Custom Topic 7" },
+          { name: "Custom Topic 8", response: "Response for Custom Topic 8" },
+          { name: "Custom Topic 9", response: "Response for Custom Topic 9" },
+          { name: "Custom Topic 10", response: "Response for Custom Topic 10" },
+        ],
+      },
+    };
+
+    // Template for Customer Note Format
+    const customerNoteTemplate = `Chat 1
+
+Verification: 
+Product and/or order details: 
+Summary of the customer's concern: 
+Summary of the case: 
+Uber Wizard recommendation: 
+Steps Taken: 
+Next action to perform: 
+
+Chat 2
+
+Verification: 
+Product and/or order details: 
+Summary of the customer's concern: 
+Summary of the case: 
+Uber Wizard recommendation: 
+Steps Taken: 
+Next action to perform: 
+
+Chat 3
+
+Verification: 
+Product and/or order details: 
+Summary of the customer's concern: 
+Summary of the case: 
+Uber Wizard recommendation: 
+Steps Taken: 
+Next action to perform:`;
+
+    // Variable to store the previous customer note
+    let previousCustomerNote = "";
+
+    // Function to copy Final DTK Amount to clipboard (without alert)
+    document.getElementById("final-dtk").addEventListener("click", function () {
+      const finalDTKValue = this.value;
+      if (finalDTKValue) {
+        navigator.clipboard.writeText(finalDTKValue).catch((err) => {
+          console.error("Failed to copy Final DTK Amount: ", err);
+        });
+      }
+    });
+
+    // Function to clear Customer Note and store the previous note
+    function clearCustomerNote() {
+      const customerNoteTextarea = document.getElementById("customer-note");
+      previousCustomerNote = customerNoteTextarea.value; // Store the current note
+      customerNoteTextarea.value = customerNoteTemplate; // Set the template
+    }
+
+    // Function to restore the previous Customer Note
+    function restoreCustomerNote() {
+      const customerNoteTextarea = document.getElementById("customer-note");
+      customerNoteTextarea.value = previousCustomerNote; // Restore the previous note
+    }
+
+    // Initialize Customer Note Format with the template on page load
+    document.addEventListener("DOMContentLoaded", () => {
+      const customerNoteTextarea = document.getElementById("customer-note");
+      customerNoteTextarea.value = customerNoteTemplate;
+    });
+
+    // Function to generate HTML based on the data
+    function generateHTML() {
+      const container = document.getElementById("container");
+
+      // Loop through each category
+      for (const category in data) {
+        const section = document.createElement("div");
+        section.className = "section";
+
+        // Add the category title
+        const title = document.createElement("h2");
+        title.textContent = data[category].title;
+        section.appendChild(title);
+
+        // Loop through topics and create buttons
+        data[category].topics.forEach((topic, index) => {
+          const button = createTopicButton(topic, category, index);
+          section.appendChild(button);
+        });
+
+        // Add "Add Topic" button at the bottom of each section
+        const addButton = document.createElement("button");
+        addButton.className = "add-button";
+        addButton.textContent = "Add Topic";
+        addButton.onclick = () => addNewTopic(category, addButton);
+        section.appendChild(addButton);
+
+        // Add the section to the container
+        container.appendChild(section);
+      }
+    }
+
+    // Function to create a topic button
+    function createTopicButton(topic, category, index) {
+      const button = document.createElement("button");
+      button.textContent = topic.name;
+      button.onclick = () => copyResponse(topic.response);
+
+      // Add hover event to show modal
+      let modalTimeout;
+      button.addEventListener("mouseenter", (e) => {
+        const modal = document.getElementById("edit-modal");
+        modal.style.display = "block";
+        modal.style.left = `${e.clientX}px`;
+        modal.style.top = `${e.clientY}px`;
+
+        // Populate modal with current topic and response
+        document.getElementById("edit-topic").value = topic.name;
+        document.getElementById("edit-response").value = topic.response;
+
+        // Save changes when the save button is clicked
+        document.getElementById("save-changes").onclick = () => {
+          topic.name = document.getElementById("edit-topic").value;
+          topic.response = document.getElementById("edit-response").value;
+          button.textContent = topic.name; // Update button text
+          saveToLocalStorage(); // Save changes to localStorage
+        };
+
+        // Delete topic when the delete button is clicked
+        document.getElementById("delete-topic").onclick = () => {
+          data[category].topics.splice(index, 1); // Remove the topic from the data
+          button.remove(); // Remove the button from the DOM
+          saveToLocalStorage(); // Save changes to localStorage
+          modal.style.display = "none"; // Hide the modal
+        };
+
+        // Clear timeout if modal is already open
+        clearTimeout(modalTimeout);
+      });
+
+      // Hide modal 3 seconds after mouse leaves the button
+      button.addEventListener("mouseleave", () => {
+        const modal = document.getElementById("edit-modal");
+        modalTimeout = setTimeout(() => {
+          if (!modal.matches(":hover")) {
+            modal.style.display = "none";
+          }
+        }, 3000); // 3000 milliseconds = 3 seconds
+      });
+
+      // Keep modal open if it is hovered
+      const modal = document.getElementById("edit-modal");
+      modal.addEventListener("mouseenter", () => {
+        clearTimeout(modalTimeout);
+      });
+
+      modal.addEventListener("mouseleave", () => {
+        modalTimeout = setTimeout(() => {
+          modal.style.display = "none";
+        }, 3000); // 3000 milliseconds = 3 seconds
+      });
+
+      return button;
+    }
+
+    // Function to add a new topic button
+    function addNewTopic(category, addButton) {
+      const newTopic = {
+        name: "New Topic",
+        response: "Response for New Topic",
+      };
+      data[category].topics.push(newTopic);
+
+      // Create the new button
+      const newButton = createTopicButton(newTopic, category, data[category].topics.length - 1);
+
+      // Insert the new button above the "Add Topic" button
+      addButton.parentElement.insertBefore(newButton, addButton);
+
+      // Save changes to localStorage
+      saveToLocalStorage();
+    }
+
+    // Function to copy response to clipboard
+    function copyResponse(text) {
+      navigator.clipboard.writeText(text).catch((err) => {
+        console.error("Failed to copy text: ", err);
+      });
+    }
+
+    // Function to copy notes to clipboard
+    function copyNotes() {
+      const notes = document.getElementById("notes").value;
+      navigator.clipboard.writeText(notes).catch((err) => {
+        console.error("Failed to copy notes: ", err);
+      });
+    }
+
+    // Function to clear notes
+    function clearNotes() {
+      document.getElementById("notes").value = "";
+      localStorage.setItem("notes", ""); // Clear notes from localStorage
+    }
+
+    // Function to copy customer note to clipboard
+    function copyCustomerNote() {
+      const customerNote = document.getElementById("customer-note").value;
+      navigator.clipboard.writeText(customerNote).catch((err) => {
+        console.error("Failed to copy text: ", err);
+      });
+    }
+
+    // Function to save data to localStorage
+    function saveToLocalStorage() {
+      localStorage.setItem("data", JSON.stringify(data));
+      localStorage.setItem("notes", document.getElementById("notes").value);
+      localStorage.setItem("customer-note", document.getElementById("customer-note").value);
+      localStorage.setItem("item-cost", document.getElementById("item-cost").value);
+      localStorage.setItem("discount", document.getElementById("discount").value);
+      localStorage.setItem("dtk-percent", document.getElementById("dtk-percent").value);
+      localStorage.setItem("final-dtk", document.getElementById("final-dtk").value);
+      localStorage.setItem("currentPrice", document.getElementById("currentPrice").value);
+      localStorage.setItem("salePrice", document.getElementById("salePrice").value);
+      localStorage.setItem("discountPercentage", document.getElementById("discountPercentage").textContent);
+    }
+
+    // Function to load data from localStorage
+    function loadFromLocalStorage() {
+      const savedData = localStorage.getItem("data");
+      if (savedData) {
+        Object.assign(data, JSON.parse(savedData));
+      }
+
+      // Load notes
+      const notes = localStorage.getItem("notes");
+      if (notes !== null) {
+        document.getElementById("notes").value = notes;
+      }
+
+      // Load customer note
+      const customerNote = localStorage.getItem("customer-note");
+      if (customerNote !== null) {
+        document.getElementById("customer-note").value = customerNote;
+      }
+
+      // Load DTK Calculator values
+      document.getElementById("item-cost").value = localStorage.getItem("item-cost") || "200.08";
+      document.getElementById("discount").value = localStorage.getItem("discount") || "5";
+      document.getElementById("dtk-percent").value = localStorage.getItem("dtk-percent") || "30";
+      document.getElementById("final-dtk").value = localStorage.getItem("final-dtk") || "";
+
+      // Load Quote Tool values
+      document.getElementById("currentPrice").value = localStorage.getItem("currentPrice") || "";
+      document.getElementById("salePrice").value = localStorage.getItem("salePrice") || "";
+      document.getElementById("discountPercentage").textContent = localStorage.getItem("discountPercentage") || "0";
+    }
+
+    // Function to update Manila Time and NI
+    function updateInfoBar() {
+      const manilaTimeElement = document.getElementById("manila-time");
+      const niElement = document.getElementById("ni");
+
+      // Get Manila Time
+      const manilaTime = new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Manila",
+        hour12: true,
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+      });
+      manilaTimeElement.textContent = `Manila Time: ${manilaTime}`;
+
+      // Get NI (Network Information)
+      const ni = navigator.connection
+        ? `Network Type: ${navigator.connection.effectiveType}, Downlink: ${navigator.connection.downlink} Mbps`
+        : "Network Information: Not available";
+      niElement.textContent = `NI: ${ni}`;
+    }
+
+    // Function to calculate DTK
+    function calculateDTK() {
+      const itemCost = parseFloat(document.getElementById("item-cost").value) || 0;
+      const discount = parseFloat(document.getElementById("discount").value) || 0;
+      const dtkPercent = parseFloat(document.getElementById("dtk-percent").value) || 0;
+
+      const finalDTK = (itemCost - discount) * (dtkPercent / 100) * 1.1;
+      document.getElementById("final-dtk").value = finalDTK.toFixed(2);
+      saveToLocalStorage(); // Save DTK values to localStorage
+    }
+
+    // Function to calculate Discount Percentage
+    function calculateDiscount() {
+      const currentPrice = parseFloat(document.getElementById("currentPrice").value);
+      const salePrice = parseFloat(document.getElementById("salePrice").value);
+
+      if (isNaN(currentPrice) || isNaN(salePrice) || currentPrice <= 0) {
+        document.getElementById("discountPercentage").textContent = '0';
+        return;
+      }
+
+      if (salePrice > currentPrice) {
+        document.getElementById("discountPercentage").textContent = '0';
+        return;
+      }
+
+      const discountPercentage = ((currentPrice - salePrice) / currentPrice) * 100;
+      document.getElementById("discountPercentage").textContent = discountPercentage;
+      saveToLocalStorage(); // Save Quote Tool values to localStorage
+    }
+
+    // Event listeners for DTK calculator
+    document.getElementById("item-cost").addEventListener("input", calculateDTK);
+    document.getElementById("discount").addEventListener("input", calculateDTK);
+    document.getElementById("dtk-percent").addEventListener("input", calculateDTK);
+
+    // Event listeners for Quote Tool calculator
+    document.getElementById("currentPrice").addEventListener("input", calculateDiscount);
+    document.getElementById("salePrice").addEventListener("input", calculateDiscount);
+
+    // Auto-save functionality for Notes and Customer Note Format
+    document.getElementById("notes").addEventListener("input", saveToLocalStorage);
+    document.getElementById("customer-note").addEventListener("input", saveToLocalStorage);
+
+    // Hide modal when clicking outside of it
+    document.addEventListener("click", (e) => {
+      const modal = document.getElementById("edit-modal");
+      if (!modal.contains(e.target) && !e.target.classList.contains("section-button")) {
+        modal.style.display = "none";
+      }
+    });
+
+    // Update Manila Time and NI every second
+    setInterval(updateInfoBar, 1000);
+
+    // Generate the HTML when the page loads
+    loadFromLocalStorage();
+    generateHTML();
+    updateInfoBar(); // Initial call to display Manila Time and NI
+    calculateDTK(); // Initial call to calculate DTK
+    calculateDiscount(); // Initial call to calculate Discount Percentage
+  </script>
+</body>
+</html>
