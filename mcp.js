@@ -40,7 +40,7 @@ export class McpClient {
     await this.request('initialize',{
       protocolVersion:'2025-03-26',
       capabilities:{},
-      clientInfo:{name:'gemini-copilot',version:'0.2.0'}
+      clientInfo:{name:'gemini-copilot',version:'0.2.1'}
     });
     await this.request('notifications/initialized',undefined,true);
     const result=await this.request('tools/list',{});

@@ -4,6 +4,7 @@ Verified in this cloud session:
 - Node test runner: URL restrictions, contextual action prompts, action-plan parsing, MCP URL policy, and Confluence tool inference passed.
 - JavaScript syntax checks passed.
 - Chromium 154 controlled DOM fixture: context extraction, editable-field exclusion, visible links, text fill and click passed.
+- Chromium 154 simplified UI smoke test: selected-page capture, prompt preparation, Gemini plan import, tab focus, and confirmed DOM click passed with mocked extension APIs.
 
 Not verified:
 - Actual extension loading: Chromium's extension service worker did not appear within the test timeout.

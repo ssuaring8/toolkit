@@ -49,19 +49,33 @@ async function runAction(action){
  return runDomAction(action);
 }
 
+async function captureSelectedTabs(){
+ const selected=[...$('tabs').querySelectorAll('input:checked')];
+ const retained=pages.filter(page=>page.source==='mcp');
+ if(!selected.length&&!retained.length)throw new Error('Select at least one page, or add a Confluence result.');
+ if(selected.length>8)throw new Error('Select at most 8 tabs per task.');
+ if(!selected.length){pages=retained;updateContextLabel();return;}
+ const origins=[...new Set(selected.map(box=>`${new URL(box.dataset.url).origin}/*`))];
+ if(!await chrome.permissions.request({origins}))throw new Error('Page access was not granted.');
+ const results=await Promise.allSettled(selected.map(async box=>{
+  const tab=await chrome.tabs.get(Number(box.value));
+  if(new URL(tab.url).origin!==new URL(box.dataset.url).origin)throw new Error('A selected tab navigated. Refresh the list and try again.');
+  const [result]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:readPage});
+  return {...result.result,tabId:tab.id,source:'tab'};
+ }));
+ pages=[...retained,...results.filter(result=>result.status==='fulfilled').map(result=>result.value)];
+ const failures=results.filter(result=>result.status==='rejected');
+ updateContextLabel();
+ if(failures.length)throw new Error(`${failures.length} selected tab(s) could not be read: ${failures.map(result=>result.reason.message).join('; ')}`);
+}
+
 $('target').addEventListener('change',()=>{$('current-url').value=$('target').selectedOptions[0]?.dataset.url||'';});
 task('refresh',refresh);
-task('read',async()=>{
- pages=[];const selected=[...$('tabs').querySelectorAll('input:checked')];
- if(!selected.length)throw new Error('Select at least one tab.');if(selected.length>8)throw new Error('Select at most 8 tabs per request.');
- const origins=[...new Set(selected.map(box=>`${new URL(box.dataset.url).origin}/*`))];if(!await chrome.permissions.request({origins}))throw new Error('Page access was not granted.');
- const results=await Promise.allSettled(selected.map(async box=>{const tab=await chrome.tabs.get(Number(box.value));if(new URL(tab.url).origin!==new URL(box.dataset.url).origin)throw new Error('Tab navigated. Refresh and select it again.');const [result]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:readPage});return {...result.result,tabId:tab.id};}));
- pages=results.filter(result=>result.status==='fulfilled').map(result=>result.value);const failures=results.filter(result=>result.status==='rejected');updateContextLabel();
- status(failures.length?`${failures.length} tab(s) could not be read: ${failures.map(result=>result.reason.message).join('; ')}`:'Context captured. Prompt Gemini with the browser task you want completed.');
-});
+task('select-all',async()=>{$('tabs').querySelectorAll('input[type="checkbox"]').forEach(box=>box.checked=true);status('All visible web tabs selected.');});
+task('clear-all',async()=>{$('tabs').querySelectorAll('input[type="checkbox"]').forEach(box=>box.checked=false);status('Tab selection cleared.');});
 task('open',()=>gemini(true));
 task('account',()=>chrome.tabs.create({url:`https://accounts.google.com/AccountChooser?continue=${encodeURIComponent('https://gemini.google.com/app')}`}));
-task('prepare',async()=>{const question=$('question').value.trim();if(!question)throw new Error('Enter a browser task first.');const prompt=buildPrompt(question,pages);$('preview').value=prompt;const result=await bridge('prepare',prompt);const tab=await gemini();await chrome.tabs.update(tab.id,{active:true});status(result);});
+task('prepare',async()=>{const question=$('question').value.trim();if(!question)throw new Error('Describe what you want Gemini to do.');await captureSelectedTabs();const prompt=buildPrompt(question,pages);$('preview').value=prompt;const result=await bridge('prepare',prompt);const tab=await gemini();await chrome.tabs.update(tab.id,{active:true});status(result);});
 task('copy',async()=>{if(!$('preview').value)throw new Error('Prepare a prompt first.');await navigator.clipboard.writeText($('preview').value);status('Prompt copied.');});
 task('reply',async()=>{const reply=await bridge('read');$('answer').textContent=reply;actionPlan=parseActionPlan(reply);$('plan').textContent=actionPlan.length?JSON.stringify(actionPlan,null,2):'Gemini did not include a copilot-actions plan. Ask it to provide browser actions.';$('run-plan').disabled=!actionPlan.length;status(actionPlan.length?`Loaded ${actionPlan.length} Gemini browser action(s). Review and run the plan.`:'Latest response imported without browser actions.');});
 task('run-plan',async()=>{if(!actionPlan.length)throw new Error('Import a Gemini response containing copilot-actions first.');const outcomes=[];for(const action of actionPlan)outcomes.push(await runAction(action));actionPlan=[];$('run-plan').disabled=true;$('plan').textContent=outcomes.join('\n');await refresh();status('Gemini action plan finished. Read affected tabs again before asking for the next step.');});
@@ -77,6 +91,6 @@ task('execute',async()=>{const option=$('target').selectedOptions[0];if(!option)
 task('mcp-signin',()=>chrome.tabs.create({url:webUrl($('mcp-endpoint').value)}));
 task('mcp-connect',async()=>{const endpoint=$('mcp-endpoint').value.trim();const origin=`${new URL(endpoint).origin}/*`;if(!await chrome.permissions.request({origins:[origin]}))throw new Error('MCP server access was not granted.');mcpClient=new McpClient(endpoint,$('mcp-token').value);mcpTools=await mcpClient.connect();$('mcp-tool').replaceChildren();for(const tool of mcpTools){const option=document.createElement('option');option.value=tool.name;option.textContent=tool.name;$('mcp-tool').append(option);}const suggested=chooseSearchTool(mcpTools);if(suggested)$('mcp-tool').value=suggested.name;status(`Connected to MCP server. Found ${mcpTools.length} tool(s).`);});
 task('mcp-search',async()=>{if(!mcpClient)throw new Error('Connect to the MCP server first.');const query=$('mcp-query').value.trim();if(!query)throw new Error('Enter a Confluence search query.');const tool=mcpTools.find(item=>item.name===$('mcp-tool').value);if(!tool)throw new Error('Choose an MCP tool.');mcpResult=await mcpClient.callTool(tool.name,searchArguments(tool,query));$('mcp-output').textContent=JSON.stringify(mcpResult,null,2);status(`Confluence MCP tool ${tool.name} completed.`);});
-task('mcp-context',async()=>{if(!mcpResult)throw new Error('Run an MCP search first.');pages.push({title:`Confluence MCP: ${$('mcp-tool').value}`,url:$('mcp-endpoint').value,text:JSON.stringify(mcpResult,null,2).slice(0,12000),links:[],elements:[]});updateContextLabel();status('MCP result added to Gemini context.');});
+task('mcp-context',async()=>{if(!mcpResult)throw new Error('Run an MCP search first.');pages.push({title:`Confluence MCP: ${$('mcp-tool').value}`,url:$('mcp-endpoint').value,text:JSON.stringify(mcpResult,null,2).slice(0,12000),links:[],elements:[],source:'mcp'});updateContextLabel();status('MCP result added to the next Gemini task.');});
 
 refresh().catch(error=>status(error.message));

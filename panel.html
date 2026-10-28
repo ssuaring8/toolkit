@@ -1,8 +1,107 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gemini Copilot</title><link rel="stylesheet" href="panel.css"></head><body>
-<header><div class="mark">✦</div><div><h1>Gemini Copilot</h1><p>Your tabs. A little more connected.</p></div><span class="badge">WEB</span></header>
-<main><section><div class="row"><h2>01 · Choose context</h2><button id="refresh" class="quiet">Refresh tabs</button></div><p class="hint">Only selected tabs are read. Their text will be shared with Google when you send in Gemini.</p><div id="tabs"></div><button id="read">Read selected tabs</button><p id="context" class="hint">No page context yet.</p></section>
-<section><h2>02 · Ask Gemini</h2><label for="question">What would you like to explore?</label><textarea id="question" rows="4" placeholder="Compare these pages, find the key differences, and suggest where to go next…"></textarea><div class="row wrap"><button id="prepare" class="primary">Prepare in Gemini ↗</button><button id="open" class="quiet">Open Gemini</button><button id="account" class="quiet">Choose Google account</button></div><p class="hint">Choose Google account opens Google's account chooser, then Gemini. The model and plan still come from that Google account. Review the prompt and press Send in Gemini.</p><details><summary>Prompt preview / manual fallback</summary><textarea id="preview" rows="8" readonly aria-label="Prepared prompt"></textarea><button id="copy">Copy prompt</button></details></section>
-<section><div class="row"><h2>03 · Browse pages</h2><button id="reply" class="quiet">Read latest Gemini reply</button></div><pre id="answer">Gemini’s latest response will appear here.</pre><label for="url">Open a new page</label><div class="row"><input id="url" type="url" placeholder="https://example.com"><button id="navigate">Open ↗</button></div><p class="hint">Control the target tab selected below.</p><div class="row wrap"><button id="focus" class="quiet">Show tab</button><button id="back" class="quiet">← Back</button><button id="forward" class="quiet">Forward →</button><button id="reload" class="quiet">Reload</button></div><label for="current-url">Navigate target tab</label><div class="row"><input id="current-url" type="url" placeholder="https://example.com"><button id="go">Go</button></div></section>
-<section><h2>04 · Prompt-controlled browser actions</h2><p class="hint">Ask Gemini what to do, import its reply, then run its structured action plan. Safe navigation runs immediately; clicks and typing always ask you first.</p><pre id="plan">No Gemini action plan loaded.</pre><button id="run-plan" class="primary" disabled>Run Gemini action plan</button><details><summary>Manual page action</summary><p class="hint">Use a CSS selector matching one element on the target tab.</p><label for="target">Target tab</label><select id="target"></select><label for="action">Action</label><select id="action"><option value="scroll">Scroll to element</option><option value="fill">Fill text field</option><option value="click">Click element</option></select><label for="selector">CSS selector</label><input id="selector" placeholder="#search"><label for="value">Text to fill</label><input id="value"><button id="execute">Review and run action</button></details></section>
-<section><h2>05 · Confluence through MCP · advanced</h2><p class="hint">Connect to a Streamable HTTP MCP server that provides Confluence tools. Your company or MCP provider supplies the endpoint and sign-in. ChatGPT MCP connections cannot be reused by browser extensions.</p><label for="mcp-endpoint">MCP server URL</label><input id="mcp-endpoint" type="url" placeholder="https://your-mcp-server.example.com/mcp"><label for="mcp-token">Bearer token · optional · kept only while this panel is open</label><input id="mcp-token" type="password" autocomplete="off" placeholder="Leave empty for cookie or server sign-in"><div class="row wrap"><button id="mcp-signin" class="quiet">Open server sign-in</button><button id="mcp-connect">Connect and list tools</button></div><label for="mcp-tool">Search tool</label><select id="mcp-tool"></select><label for="mcp-query">Confluence search</label><input id="mcp-query" placeholder="Search Confluence…"><button id="mcp-search">Search through MCP</button><pre id="mcp-output">No MCP result yet.</pre><button id="mcp-context" class="quiet">Add result to Gemini context</button></section>
-<p id="status" role="status" aria-live="polite">Ready. Select a few tabs to begin.</p><footer>Local extension · Optional MCP · You control what gets sent</footer></main><script type="module" src="panel.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gemini Copilot</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <header>
+    <div class="mark">✦</div>
+    <div><h1>Gemini Copilot</h1><p>Tell Gemini what to do in your browser.</p></div>
+    <span class="badge">0.2.1</span>
+  </header>
+  <main>
+    <section class="setup">
+      <h2>Start with Gemini</h2>
+      <div class="button-row">
+        <button id="account" class="primary">Choose Google account</button>
+        <button id="open" class="secondary">Open Gemini</button>
+      </div>
+      <p class="hint">Choose the Google account whose Gemini plan and models you want to use.</p>
+    </section>
+
+    <section>
+      <div class="step-title"><span>1</span><h2>Choose pages</h2></div>
+      <div class="toolbar">
+        <button id="select-all" class="text-button">Select all</button>
+        <button id="clear-all" class="text-button">Clear</button>
+        <button id="refresh" class="text-button">Refresh</button>
+      </div>
+      <div id="tabs" class="tab-list"></div>
+      <p id="context" class="hint">Select the tabs Gemini should read.</p>
+    </section>
+
+    <section>
+      <div class="step-title"><span>2</span><h2>Describe the task</h2></div>
+      <label class="sr-only" for="question">Browser task</label>
+      <textarea id="question" rows="5" placeholder="Example: Compare these pages, open the best option, and scroll to pricing."></textarea>
+      <button id="prepare" class="primary full">Prepare task in Gemini ↗</button>
+      <p class="hint">This reads the selected tabs and prepares the task. Review it in Gemini, then press Send.</p>
+      <details>
+        <summary>View or copy the prepared prompt</summary>
+        <textarea id="preview" rows="8" readonly aria-label="Prepared prompt"></textarea>
+        <button id="copy" class="secondary">Copy prompt</button>
+      </details>
+    </section>
+
+    <section>
+      <div class="step-title"><span>3</span><h2>Review and run</h2></div>
+      <button id="reply" class="secondary full">Import Gemini response</button>
+      <p class="hint">Wait for Gemini to finish before importing.</p>
+      <details>
+        <summary>Show Gemini response</summary>
+        <pre id="answer">No response imported.</pre>
+      </details>
+      <div class="plan-card">
+        <strong>Browser action plan</strong>
+        <pre id="plan">No action plan loaded.</pre>
+      </div>
+      <button id="run-plan" class="primary full" disabled>Run reviewed actions</button>
+      <p class="hint">Navigation runs directly. The extension asks before every click or text entry.</p>
+    </section>
+
+    <details class="advanced">
+      <summary>Browser controls</summary>
+      <div class="advanced-body">
+        <label for="target">Target tab</label>
+        <select id="target"></select>
+        <div class="button-row compact">
+          <button id="focus">Show</button><button id="back">← Back</button><button id="forward">Forward →</button><button id="reload">Reload</button>
+        </div>
+        <label for="current-url">Navigate target tab</label>
+        <div class="inline"><input id="current-url" type="url" placeholder="https://example.com"><button id="go">Go</button></div>
+        <label for="url">Open new tab</label>
+        <div class="inline"><input id="url" type="url" placeholder="https://example.com"><button id="navigate">Open</button></div>
+        <hr>
+        <h3>Manual page action</h3>
+        <label for="action">Action</label>
+        <select id="action"><option value="scroll">Scroll</option><option value="fill">Fill text</option><option value="click">Click</option></select>
+        <label for="selector">CSS selector</label><input id="selector" placeholder="#search">
+        <label for="value">Text to fill</label><input id="value">
+        <button id="execute" class="secondary full">Review manual action</button>
+      </div>
+    </details>
+
+    <details class="advanced">
+      <summary>Confluence MCP · optional</summary>
+      <div class="advanced-body">
+        <p class="hint">Requires a Streamable HTTP MCP server supplied by your company or MCP provider.</p>
+        <label for="mcp-endpoint">MCP server URL</label><input id="mcp-endpoint" type="url" placeholder="https://your-server.example.com/mcp">
+        <label for="mcp-token">Bearer token · optional</label><input id="mcp-token" type="password" autocomplete="off" placeholder="Kept only while this panel is open">
+        <div class="button-row"><button id="mcp-signin">Open sign-in</button><button id="mcp-connect" class="secondary">Connect</button></div>
+        <label for="mcp-tool">Confluence search tool</label><select id="mcp-tool"></select>
+        <label for="mcp-query">Search</label><input id="mcp-query" placeholder="Search Confluence…">
+        <button id="mcp-search" class="secondary full">Search through MCP</button>
+        <pre id="mcp-output">No MCP result yet.</pre>
+        <button id="mcp-context" class="secondary full">Add result to task context</button>
+      </div>
+    </details>
+
+    <p id="status" role="status" aria-live="polite">Ready. Choose pages and describe a task.</p>
+    <footer>No Gemini API key · Nothing is sent until you choose it</footer>
+  </main>
+  <script type="module" src="panel.js"></script>
+</body>
+</html>

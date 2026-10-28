@@ -8,8 +8,11 @@ An experimental Manifest V3 extension for Brave and Chrome. Read up to eight sel
 3. Choose **Load unpacked** and select the directory containing `manifest.json`.
 4. Pin Gemini Copilot and click its icon to open the side panel.
 5. Click **Choose Google account**, select the Google account you want, and choose the model available to that account in Gemini.
-6. Return to your browsing window, refresh the tab list, select pages, and click **Read selected tabs**. Grant site access when requested.
-7. Type your browser task and click **Prepare in Gemini**. Review the prompt in Gemini and press **Send**. Once Gemini finishes, click **Read latest Gemini reply**, review the structured plan, and click **Run Gemini action plan**. Navigation runs directly; clicks and typing require confirmation.
+6. Select the pages Gemini should use and type the browser task.
+7. Click **Prepare task in Gemini**. This reads the selected pages automatically. Review the prompt in Gemini and press **Send**.
+8. Return to the side panel, click **Import Gemini response**, review the action plan, then click **Run reviewed actions**. Navigation runs directly; clicks and typing require confirmation.
+
+The normal workflow has only three numbered sections. Manual navigation, CSS-selector actions, and Confluence MCP settings are collapsed under advanced controls.
 
 ## Confluence MCP
 The extension can connect to a Streamable HTTP MCP endpoint. Enter the endpoint supplied by your company or MCP provider, grant host access, sign in to that server (or enter a short-lived bearer token), then connect and choose its Confluence search tool. The token stays only in the open side-panel JavaScript state and is not saved.

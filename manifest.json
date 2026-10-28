@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gemini Copilot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Browse selected tabs, use your chosen Gemini account, and connect to an HTTP MCP server.",
   "minimum_chrome_version": "116",
   "permissions": [
