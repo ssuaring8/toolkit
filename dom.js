@@ -4,7 +4,39 @@ export function readPage() {
   const copy = root.cloneNode(true);
   copy.querySelectorAll('script,style,noscript,input,textarea,select,[contenteditable], [hidden], [aria-hidden="true"]').forEach(e=>e.remove());
   const links = [...root.querySelectorAll('a[href]')].filter(a=>a.getClientRects().length).map(a=>({text:a.innerText.trim().slice(0,160),url:a.href})).filter(a=>/^https?:/.test(a.url)).slice(0,60);
-  return {title:document.title,url:location.href,text:(copy.innerText || copy.textContent || '').replace(/\n{3,}/g,'\n\n').slice(0,12000),links};
+  function selectorFor(el) {
+    if(el.id) {
+      const selector=`#${CSS.escape(el.id)}`;
+      if(document.querySelectorAll(selector).length===1)return selector;
+    }
+    for(const attr of ['data-testid','name','aria-label']) {
+      const value=el.getAttribute(attr);
+      if(value) {
+        const selector=`${el.tagName.toLowerCase()}[${attr}="${CSS.escape(value)}"]`;
+        if(document.querySelectorAll(selector).length===1)return selector;
+      }
+    }
+    const parts=[];
+    for(let node=el;node && node!==document.body;node=node.parentElement) {
+      const tag=node.tagName.toLowerCase();
+      const siblings=[...node.parentElement.children].filter(item=>item.tagName===node.tagName);
+      parts.unshift(`${tag}:nth-of-type(${siblings.indexOf(node)+1})`);
+      const selector=`body > ${parts.join(' > ')}`;
+      if(document.querySelectorAll(selector).length===1)return selector;
+    }
+    return '';
+  }
+  const elements=[...document.querySelectorAll('a[href],button,input,textarea,select,[role="button"]')]
+    .filter(el=>el.getClientRects().length && !el.disabled && !(el instanceof HTMLInputElement && ['password','hidden'].includes(el.type)))
+    .slice(0,100)
+    .map(el=>({
+      selector:selectorFor(el),
+      tag:el.tagName.toLowerCase(),
+      type:el.getAttribute('type') || '',
+      text:(el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || '').trim().slice(0,160),
+      href:el instanceof HTMLAnchorElement && /^https?:/.test(el.href) ? el.href : undefined
+    })).filter(item=>item.selector);
+  return {title:document.title,url:location.href,text:(copy.innerText || copy.textContent || '').replace(/\n{3,}/g,'\n\n').slice(0,12000),links,elements};
 }
 export function geminiBridge(action, text) {
   if (location.origin !== 'https://gemini.google.com') throw new Error('Wrong origin');
