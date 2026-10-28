@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Copilot",
+  "version": "0.1.0",
+  "description": "Bring selected browser tabs to your signed-in Gemini web session. No API key.",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "sidePanel",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://gemini.google.com/*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open Gemini Copilot"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  }
+}
