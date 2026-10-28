@@ -1,5 +1,5 @@
-import {readPage,geminiBridge,interactPage} from './dom.js';
-import {webUrl,buildPrompt,parseActionPlan,chooseSearchTool,searchArguments} from './core.js';
+import {readPage,geminiBridge,interactPage,showControlTest} from './dom.js';
+import {webUrl,buildPrompt,parseActionPlan,fallbackOpenPlan,chooseSearchTool,searchArguments} from './core.js';
 import {McpClient} from './mcp.js';
 
 const $=id=>document.getElementById(id);
@@ -48,6 +48,13 @@ async function runAction(action){
  }
  return runDomAction(action);
 }
+async function executeActionPlan(){
+ if(!actionPlan.length)throw new Error('No browser actions are available.');
+ const outcomes=[];
+ for(const action of actionPlan)outcomes.push(await runAction(action));
+ actionPlan=[];$('run-plan').disabled=true;$('plan').textContent=outcomes.join('\n');await refresh();
+ status('Gemini action plan finished. Read changed pages again before asking for the next step.');
+}
 
 async function captureSelectedTabs(){
  const selected=[...$('tabs').querySelectorAll('input:checked')];
@@ -73,12 +80,31 @@ $('target').addEventListener('change',()=>{$('current-url').value=$('target').se
 task('refresh',refresh);
 task('select-all',async()=>{$('tabs').querySelectorAll('input[type="checkbox"]').forEach(box=>box.checked=true);status('All visible web tabs selected.');});
 task('clear-all',async()=>{$('tabs').querySelectorAll('input[type="checkbox"]').forEach(box=>box.checked=false);status('Tab selection cleared.');});
+task('test-control',async()=>{
+ const box=$('tabs').querySelector('input:checked');
+ if(!box)throw new Error('Select one page first.');
+ const origin=`${new URL(box.dataset.url).origin}/*`;
+ if(!await chrome.permissions.request({origins:[origin]}))throw new Error('Page access was not granted.');
+ const tab=await chrome.tabs.get(Number(box.value));
+ await chrome.tabs.update(tab.id,{active:true});
+ const [result]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:showControlTest});
+ status(result.result);
+});
 task('open',()=>gemini(true));
 task('account',()=>chrome.tabs.create({url:`https://accounts.google.com/AccountChooser?continue=${encodeURIComponent('https://gemini.google.com/app')}`}));
 task('prepare',async()=>{const question=$('question').value.trim();if(!question)throw new Error('Describe what you want Gemini to do.');await captureSelectedTabs();const prompt=buildPrompt(question,pages);$('preview').value=prompt;const result=await bridge('prepare',prompt);const tab=await gemini();await chrome.tabs.update(tab.id,{active:true});status(result);});
 task('copy',async()=>{if(!$('preview').value)throw new Error('Prepare a prompt first.');await navigator.clipboard.writeText($('preview').value);status('Prompt copied.');});
-task('reply',async()=>{const reply=await bridge('read');$('answer').textContent=reply;actionPlan=parseActionPlan(reply);$('plan').textContent=actionPlan.length?JSON.stringify(actionPlan,null,2):'Gemini did not include a copilot-actions plan. Ask it to provide browser actions.';$('run-plan').disabled=!actionPlan.length;status(actionPlan.length?`Loaded ${actionPlan.length} Gemini browser action(s). Review and run the plan.`:'Latest response imported without browser actions.');});
-task('run-plan',async()=>{if(!actionPlan.length)throw new Error('Import a Gemini response containing copilot-actions first.');const outcomes=[];for(const action of actionPlan)outcomes.push(await runAction(action));actionPlan=[];$('run-plan').disabled=true;$('plan').textContent=outcomes.join('\n');await refresh();status('Gemini action plan finished. Read affected tabs again before asking for the next step.');});
+task('reply',async()=>{
+ const reply=await bridge('read');$('answer').textContent=reply;
+ actionPlan=parseActionPlan(reply);
+ if(!actionPlan.length)actionPlan=fallbackOpenPlan($('question').value,reply);
+ $('plan').textContent=actionPlan.length?JSON.stringify(actionPlan,null,2):'Gemini returned no usable browser actions.';
+ $('run-plan').disabled=!actionPlan.length;
+ if(!actionPlan.length)throw new Error('No browser actions were found. Ask Gemini to finish with COPILOT_ACTIONS_START and COPILOT_ACTIONS_END.');
+ if(!confirm(`Gemini proposed ${actionPlan.length} browser action(s). Review the plan in the side panel, then choose OK to run now.`)){status('Plan imported. Use Run reviewed actions when ready.');return;}
+ await executeActionPlan();
+});
+task('run-plan',executeActionPlan);
 
 task('navigate',async()=>{await chrome.tabs.create({url:webUrl($('url').value)});status('Page opened. Refresh tabs to add its context.');});
 task('focus',async()=>{await chrome.tabs.update(targetTabId(),{active:true});status('Target tab shown.');});

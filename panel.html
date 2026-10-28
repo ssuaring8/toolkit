@@ -10,7 +10,7 @@
   <header>
     <div class="mark">✦</div>
     <div><h1>Gemini Copilot</h1><p>Tell Gemini what to do in your browser.</p></div>
-    <span class="badge">0.2.1</span>
+    <span class="badge">0.2.3</span>
   </header>
   <main>
     <section class="setup">
@@ -31,6 +31,7 @@
       </div>
       <div id="tabs" class="tab-list"></div>
       <p id="context" class="hint">Select the tabs Gemini should read.</p>
+      <button id="test-control" class="secondary full">Test browser control on selected page</button>
     </section>
 
     <section>
@@ -48,8 +49,8 @@
 
     <section>
       <div class="step-title"><span>3</span><h2>Review and run</h2></div>
-      <button id="reply" class="secondary full">Import Gemini response</button>
-      <p class="hint">Wait for Gemini to finish before importing.</p>
+      <button id="reply" class="primary full">Import and run Gemini plan</button>
+      <p class="hint">Wait for Gemini to finish. You will see the proposed actions and confirm before they run.</p>
       <details>
         <summary>Show Gemini response</summary>
         <pre id="answer">No response imported.</pre>

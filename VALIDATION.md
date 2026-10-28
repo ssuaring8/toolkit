@@ -5,6 +5,8 @@ Verified in this cloud session:
 - JavaScript syntax checks passed.
 - Chromium 154 controlled DOM fixture: context extraction, editable-field exclusion, visible links, text fill and click passed.
 - Chromium 154 simplified UI smoke test: selected-page capture, prompt preparation, Gemini plan import, tab focus, and confirmed DOM click passed with mocked extension APIs.
+- A direct browser-control diagnostic is included in version 0.2.2; it requests site permission, activates the selected tab, injects a visible badge, and reports the result.
+- Version 0.2.3 workflow smoke test verifies that an imported Gemini plan invokes new-tab creation, tab focus, and a confirmed DOM click. Playwright is used only for this test and is not a runtime dependency.
 
 Not verified:
 - Actual extension loading: Chromium's extension service worker did not appear within the test timeout.

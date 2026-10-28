@@ -72,3 +72,16 @@ export function interactPage(action, selector, value) {
   el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));
   return 'Field filled. Nothing submitted.';
 }
+
+export function showControlTest() {
+  const existing=document.getElementById('__gemini_copilot_test');
+  if(existing)existing.remove();
+  const badge=document.createElement('div');
+  badge.id='__gemini_copilot_test';
+  badge.textContent='Gemini Copilot can control this page';
+  Object.assign(badge.style,{position:'fixed',top:'16px',right:'16px',zIndex:'2147483647',padding:'12px 16px',borderRadius:'10px',background:'#26345f',color:'white',font:'600 14px system-ui',boxShadow:'0 5px 24px #0008'});
+  document.documentElement.append(badge);
+  window.scrollBy({top:Math.min(240,document.documentElement.scrollHeight-window.innerHeight),behavior:'smooth'});
+  setTimeout(()=>badge.remove(),3000);
+  return 'Browser control works: the page displayed a confirmation badge.';
+}

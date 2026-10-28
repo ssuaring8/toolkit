@@ -14,6 +14,13 @@ An experimental Manifest V3 extension for Brave and Chrome. Read up to eight sel
 
 The normal workflow has only three numbered sections. Manual navigation, CSS-selector actions, and Confluence MCP settings are collapsed under advanced controls.
 
+## Check browser control
+Select a normal website tab and click **Test browser control on selected page**. Brave should switch to that tab and show a temporary “Gemini Copilot can control this page” badge. This separates browser permission problems from Gemini action-format problems.
+
+Brave blocks extensions from controlling `brave://` pages, the extension store, other extension pages, and some built-in PDF viewers. Test with a normal `https://` website. If you installed an earlier build, confirm the side-panel badge says `0.2.3` after replacing the files and clicking **Reload** in `brave://extensions`.
+
+Playwright is not part of the extension and is not required to use it. The extension drives Brave through Manifest V3 `chrome.tabs` and `chrome.scripting` APIs. Playwright is used only by the project maintainers for automated browser-flow testing.
+
 ## Confluence MCP
 The extension can connect to a Streamable HTTP MCP endpoint. Enter the endpoint supplied by your company or MCP provider, grant host access, sign in to that server (or enter a short-lived bearer token), then connect and choose its Confluence search tool. The token stays only in the open side-panel JavaScript state and is not saved.
 
